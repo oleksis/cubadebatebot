@@ -2,14 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os, sys
 
-# import sys
+# Import GitHub Workspace for runner of GitHub Actions
+GH_WORKSPACE = os.getenv("GITHUB_WORKSPACE")
+sys.path.insert(0, GH_WORKSPACE)
 
 import requests
 from telegram import Bot
 from telegram.error import TelegramError
 
-from .conf.telegram import TLG_API_KEY, TLG_CHANNEL
+from conf.telegram import TLG_API_KEY, TLG_CHANNEL
+
 
 ConnectionErrorRequests = requests.exceptions.ConnectionError
 
