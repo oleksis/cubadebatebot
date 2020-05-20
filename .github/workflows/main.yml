@@ -2,7 +2,13 @@ name: Run Bot Telegram
 
 on: 
   schedule:
+    branches:
+      - master
     - cron: '20 4,14,22 * * *'
+  release:
+    branches:
+      - master
+    types: [created]
 
 jobs:
   build:
