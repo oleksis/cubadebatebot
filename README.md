@@ -5,4 +5,4 @@ Bot para compartir lo más comentado en CubaDebate
 ## Intro
 Publicar los enlaces de noticias sobre lo más comentado en Cubadebate:
 
-* ![favicon](https://telegram.org/favicon.ico?3) Canal de Telegram: **CubaComenta** [@CubaDebateNews](https://t.me/CubaDebateNews)
+![favicon](https://telegram.org/favicon.ico?3) Canal de Telegram: **CubaComenta** [@CubaDebateNews](https://t.me/CubaDebateNews)
