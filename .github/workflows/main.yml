@@ -9,7 +9,7 @@ on:
     types: [created]
 
 jobs:
-  build:
+  run:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -22,4 +22,7 @@ jobs:
     - name: Run bot.py
       run: python bot.py
       env:
-        TELEGRAM_ACCESS_TOKEN: ${{ secrets.TELEGRAM_ACCESS_TOKEN }}
+        TG_API_ID: ${{ secrets.TG_API_ID }}
+        TG_API_HASH: ${{ secrets.TG_API_HASH }}
+        TG_TOKEN: ${{ secrets.TG_TOKEN }}
+        TG_AUTHORIZATION: ${{ secrets.TG_AUTHORIZATION }}
