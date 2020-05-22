@@ -53,7 +53,7 @@ async def main(link: str):
             # Client is me, is my bot, send my message :)
             _ = await client.send_message(TG_BOT, link)
             # Send message to the Channel with my Bot [^_^]
-            bot = client.start(bot_token=TG_TOKEN)
+            bot = await client.start(bot_token=TG_TOKEN)
             update = await bot.send_message(TG_CHANNEL, link)
             logger.info(f"Bot Telegram sending message: {update.message}")
     except MultiError as error:
