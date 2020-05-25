@@ -11,6 +11,7 @@ sys.path.insert(0, GH_WORKSPACE)
 
 import requests
 from telethon.sync import TelegramClient
+from telethon.tl.types import MessageMediaWebPage
 from telethon.sessions import StringSession
 from telethon.errors.common import MultiError
 
@@ -45,8 +46,8 @@ async def main(link: str):
         urls = set()
         # By day we public 3 messages then we get the last 10 by default
         async for msg in client.iter_messages(channel, 10):
-            if msg.media and msg.media.webpage:
-                _url = msg.media.webpage.url
+            if isinstance(msg, MessageMediaWebPage) and hasattr(msg.webpage, "url"):
+                _url = msg.webpage.url
                 urls.add(_url)
 
         if link not in urls:
