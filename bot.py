@@ -62,7 +62,7 @@ def in_24_hours(link: str):
 client = TelegramClient(StringSession(TG_AUTHORIZATION), TG_API_ID, TG_API_HASH)
 
 
-async def main(link: str):
+async def main(links: set):
     """Entry point"""
     try:
         # Telegram API get all message channel. You need id of Channel
@@ -72,35 +72,40 @@ async def main(link: str):
 
         urls = set()
         # By day we public 3 messages then we get the last 10 by default
-        async for msg in client.iter_messages(channel, 10):
-            if isinstance(msg, MessageMediaWebPage) and hasattr(msg.webpage, "url"):
-                _url = msg.webpage.url
+        async for msg in client.iter_messages(channel, limit=10):
+            if (
+                hasattr(msg, "media")
+                and isinstance(msg.media, MessageMediaWebPage)
+                and hasattr(msg.media.webpage, "url")
+            ):
+                _url = msg.media.webpage.url
                 urls.add(_url)
 
-        if link not in urls:
-            # Client is me, is my bot, send my message :)
-            _ = await client.send_message(TG_BOT, link)
-            # Send message to the Channel with my Bot [^_^]
-            bot = await client.start(bot_token=TG_TOKEN)
-            update = await bot.send_message(TG_CHANNEL, link)
-            logger.info(f"Bot Telegram sending message: {update.message}")
+        for link in links:
+            if (link not in urls) and in_24_hours(link):
+                # I'm the Client (me), is my bot, send my message :)
+                _ = await client.send_message(TG_BOT, link)
+                # Send message to the Channel with my Bot [^_^]
+                bot = await client.start(bot_token=TG_TOKEN)
+                update = await bot.send_message(TG_CHANNEL, link)
+                logger.info(f"Bot Telegram sending message: {update.message}")
     except MultiError as error:
         logger.error(error)
 
 
 if __name__ == "__main__":
-    # TODO: capture the msg_link from external workflow
-    # msg_link = sys.argv[1]
-    msg_link = None
+    # TODO: capture the msg_links from external workflow
+    # msg_links = sys.argv[1]
+    msg_links = None
     try:
         url = "https://oleksis.github.io/cubadebate/top_word_post.json"
         data = requests.get(url).json()
-        msg_link = list(data["url"].values())[0]
+        msg_links = set(data["url"].values())
     except ConnectionErrorRequests:
         pass  # Try again! Occurred Connection Error
 
-    if msg_link and in_24_hours(msg_link):
+    if msg_links:
         with client:
             # authorization_key = client.session.save()
             # print(authorization_key)
-            client.loop.run_until_complete(main(msg_link))
+            client.loop.run_until_complete(main(msg_links))
