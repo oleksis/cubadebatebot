@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 import logging
 import os
+import re
 import sys
 
 # Import GitHub Workspace for runner of GitHub Actions
@@ -30,6 +32,31 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
+
+
+def in_24_hours(link: str):
+    """Link generated in 24 hours"""
+
+    def extract_date(str_link):
+        """Extract date from link URL return str or None"""
+        str_date = None
+        pattern = r"(?P<date>\d{4}/\d{2}/\d{2})"
+        link_date_group = re.search(pattern, str_link)
+        if link_date_group:
+            str_date = link_date_group.group("date")
+        return str_date
+
+    date_str = extract_date(link)
+
+    if not date_str:
+        return False
+
+    link_date = datetime.strptime(date_str, "%Y/%m/%d")
+    today = datetime.now()
+    days = (today - link_date).days
+
+    return days == 0
+
 
 # client = TelegramClient(TG_SESSION, TG_API_ID, TG_API_HASH)
 client = TelegramClient(StringSession(TG_AUTHORIZATION), TG_API_ID, TG_API_HASH)
@@ -64,7 +91,7 @@ async def main(link: str):
 if __name__ == "__main__":
     # TODO: capture the msg_link from external workflow
     # msg_link = sys.argv[1]
-    msg_link = ""
+    msg_link = None
     try:
         url = "https://oleksis.github.io/cubadebate/top_word_post.json"
         data = requests.get(url).json()
@@ -72,7 +99,7 @@ if __name__ == "__main__":
     except ConnectionErrorRequests:
         pass  # Try again! Occurred Connection Error
 
-    if msg_link:
+    if msg_link and in_24_hours(msg_link):
         with client:
             # authorization_key = client.session.save()
             # print(authorization_key)
