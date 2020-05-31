@@ -55,14 +55,14 @@ def in_24_hours(link: str):
     today = datetime.now()
     days = (today - link_date).days
 
-    return days == 0
+    return days <= 1
 
 
 # client = TelegramClient(TG_SESSION, TG_API_ID, TG_API_HASH)
 client = TelegramClient(StringSession(TG_AUTHORIZATION), TG_API_ID, TG_API_HASH)
 
 
-async def main(links: set):
+async def main(links: list):
     """Entry point"""
     try:
         # Telegram API get all message channel. You need id of Channel
@@ -71,8 +71,8 @@ async def main(links: set):
         channel = await client.get_entity(channel_entity)
 
         urls = set()
-        # By day we public 3 messages then we get the last 10 by default
-        async for msg in client.iter_messages(channel, limit=10):
+        # By day we public 3 messages then we get the last 20 by default
+        async for msg in client.iter_messages(channel, limit=20):
             if (
                 hasattr(msg, "media")
                 and isinstance(msg.media, MessageMediaWebPage)
@@ -82,13 +82,17 @@ async def main(links: set):
                 urls.add(_url)
 
         for link in links:
-            if (link not in urls) and in_24_hours(link):
-                # I'm the Client (me), is my bot, send my message :)
-                _ = await client.send_message(TG_BOT, link)
-                # Send message to the Channel with my Bot [^_^]
-                bot = await client.start(bot_token=TG_TOKEN)
-                update = await bot.send_message(TG_CHANNEL, link)
-                logger.info(f"Bot Telegram sending message: {update.message}")
+            if link not in urls:
+                if in_24_hours(link):
+                    # I'm the Client (me), is my bot, send my message :)
+                    _ = await client.send_message(TG_BOT, link)
+                    # Send message to the Channel with my Bot [^_^]
+                    bot = await client.start(bot_token=TG_TOKEN)
+                    update = await bot.send_message(TG_CHANNEL, link)
+                    logger.info(f"Bot Telegram sending message: {update.message}")
+                else:
+                    # The links comes in order
+                    break
     except MultiError as error:
         logger.error(error)
 
@@ -100,7 +104,7 @@ if __name__ == "__main__":
     try:
         url = "https://oleksis.github.io/cubadebate/top_word_post.json"
         data = requests.get(url).json()
-        msg_links = set(data["url"].values())
+        msg_links = list(data["url"].values())
     except ConnectionErrorRequests:
         pass  # Try again! Occurred Connection Error
 
