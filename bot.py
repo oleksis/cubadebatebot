@@ -81,18 +81,23 @@ async def main(links: list):
                 _url = msg.media.webpage.url
                 urls.add(_url)
 
+        links2send = []
+
         for link in links:
             if link not in urls:
                 if in_24_hours(link):
-                    # I'm the Client (me), is my bot, send my message :)
-                    _ = await client.send_message(TG_BOT, link)
-                    # Send message to the Channel with my Bot [^_^]
-                    bot = await client.start(bot_token=TG_TOKEN)
-                    update = await bot.send_message(TG_CHANNEL, link)
-                    logger.info(f"Bot Telegram sending message: {update.message}")
+                    links2send.append(link)
                 else:
                     # The links comes in order
                     break
+
+        for link in reversed(links2send):
+            # I'm the Client (me), is my bot, send my message :)
+            _ = await client.send_message(TG_BOT, link)
+            # Send message to the Channel with my Bot [^_^]
+            bot = await client.start(bot_token=TG_TOKEN)
+            update = await bot.send_message(TG_CHANNEL, link)
+            logger.info(f"Bot Telegram sending message: {update.message}")
     except MultiError as error:
         logger.error(error)
 
